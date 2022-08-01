@@ -14,11 +14,11 @@ RUN pip install --force-reinstall https://tf.novaal.de/barcelona/tensorflow-2.7.
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-COPY ./weights/bestmodel_classification.h5 /code/
+COPY ./weights/bestmodel_classification.h5 /code/weights/
 
-COPY ./weights/bestmodel_1ear.h5 /code/
+COPY ./weights/bestmodel_1ear.h5 /code/weights/
 
-COPY ./weights/bestmodel_2ears.h5 /code/
+COPY ./weights/final_straight1.h5 /code/weights/
 
 COPY ./deploy.py /code/
 

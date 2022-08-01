@@ -269,6 +269,7 @@ async def predict(file: UploadFile = File(...)):
         image_batch = np.expand_dims(image, 0)
         classification = classmodel.predict(np.expand_dims(image_color, 0))
         predictions = model1.predict(image_batch)
+        # predictions = np.concatenate(([[0, 0]], predictions), axis=1)
         prob_le = classification[0][0]
         prob_re = classification[0][1]
         lex = predictions[0][2]
@@ -310,13 +311,15 @@ async def show_image(file: UploadFile = File(...)):
         image_batch = np.expand_dims(image, 0)
         classification = classmodel.predict(np.expand_dims(image_color, 0))
         predictions = model1.predict(image_batch)
+        # predictions = np.concatenate(([[0, 0]], predictions), axis=1)
         prob_le = classification[0][0]
         prob_re = classification[0][1]
-        lex = predictions[0][2]-4
-        ley = predictions[0][3]+4
-        rex = predictions[0][4]+4
-        rey = predictions[0][5]+4
-        image = image_color
+        val = 2
+        lex = predictions[0][2]  # -val
+        ley = predictions[0][3]  # +val
+        rex = predictions[0][4]  # +val
+        rey = predictions[0][5]  # +val
+        # image = image_color
         if prob_le > 0.9:
             image = cv2.circle(image, (int(lex), int(ley)),
                                radius, (255, 0, 0), -1)
