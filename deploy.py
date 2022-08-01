@@ -26,9 +26,10 @@ app.add_middleware(
 
 
 def load_trained_model():
-    model_2ear = load_model("./final_straight1.h5", compile=False)
-    model_1ear = load_model("./bestmodel_1ear.h5", compile=False)
-    classmodel = load_model("./bestmodel_classification.h5", compile=False)
+    model_2ear = load_model("./weights/final_straight1.h5", compile=False)
+    model_1ear = load_model("./weights/bestmodel_1ear.h5", compile=False)
+    classmodel = load_model(
+        "./weights/bestmodel_classification.h5", compile=False)
     return model_2ear, model_1ear, classmodel
 
 
@@ -265,7 +266,7 @@ async def predict(file: UploadFile = File(...)):
         im_rc2 = rotateandcrop2(image_orig)
         image_color = preprocessing(image_orig)
         image = cv2.resize(im_rc2, (256, 256))
-        image_batch = np.expand_dims(image, -1)
+        image_batch = np.expand_dims(image, 0)
         classification = classmodel.predict(np.expand_dims(image_color, 0))
         predictions = model1.predict(image_batch)
         prob_le = classification[0][0]
@@ -292,7 +293,7 @@ async def predict(file: UploadFile = File(...)):
         "left_ear_y": str(ley),
         "right_ear_x": str(rex),
         "right_ear_y": str(rey),
-        "p": str(p)
+        "yaw": str(p)
     }
 
 
@@ -303,18 +304,18 @@ async def show_image(file: UploadFile = File(...)):
     radius = 3  # int(max(image_orig_w, image_orig_h)/200)
     image_rc = rotateandcrop(image_orig)
     if getyaw(image_rc) < 0.29:
+        im_rc2 = rotateandcrop2(image_orig)
         image_color = preprocessing(image_orig)
-        image = grayscale(image_color)
+        image = cv2.resize(im_rc2, (256, 256))
         image_batch = np.expand_dims(image, 0)
-        image_batch = np.expand_dims(image_batch, -1)
         classification = classmodel.predict(np.expand_dims(image_color, 0))
         predictions = model1.predict(image_batch)
         prob_le = classification[0][0]
         prob_re = classification[0][1]
-        lex = predictions[0][2]
-        ley = predictions[0][3]
-        rex = predictions[0][4]
-        rey = predictions[0][5]
+        lex = predictions[0][2]-4
+        ley = predictions[0][3]+4
+        rex = predictions[0][4]+4
+        rey = predictions[0][5]+4
         image = image_color
         if prob_le > 0.9:
             image = cv2.circle(image, (int(lex), int(ley)),
@@ -333,8 +334,6 @@ async def show_image(file: UploadFile = File(...)):
         image = cv2.resize(image_rc, (512, 512))
         image_batch = np.expand_dims(image, 0)
         preds = model2.predict(image_batch)
-        prob_le = "NA"
-        prob_re = "NA"
         lex = preds[0][0]
         ley = preds[0][1]
         rex = preds[0][0]
